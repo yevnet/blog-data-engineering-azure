@@ -1,0 +1,770 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "yevnet-dwdemo-adf"
+		},
+		"sqlLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'sqlLS'"
+		},
+		"synapseLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'synapseLS'"
+		},
+		"keyvaultLS_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://yevnet-KV.vault.azure.net/"
+		},
+		"datalakeLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://yevnetdwstoreaccount.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/keyvaultLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('keyvaultLS_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/datalakeLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('datalakeLS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "keyvaultLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "datalakekey1",
+						"secretVersion": ""
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/keyvaultLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sqlLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('sqlLS_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "keyvaultLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "sqldb-pw",
+						"secretVersion": ""
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/keyvaultLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/synapseLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synapseLS_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "keyvaultLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "sqldb-pw"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/keyvaultLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimCategory')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ouputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output/DimCategory",
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimEmployee')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ouputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output/DimEmployee",
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimSupplier')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ouputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output/DimSupplier",
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FactEmployee')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ouputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output/FactEmployee",
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FactEmployeeMonthly')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ouputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output/FactEmployeeMonthly",
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FactProduct')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ouputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output/FactProduct",
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FactSupervisor')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ouputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output/FactSupervisor",
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/categoriesParquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"year_p": {
+						"type": "int",
+						"defaultValue": 1996
+					},
+					"month_p": {
+						"type": "int",
+						"defaultValue": 7
+					},
+					"day_p": {
+						"type": "int",
+						"defaultValue": 16
+					}
+				},
+				"folder": {
+					"name": "preparedNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('prepared/categories/year=', string(dataset().year_p), '/month=', string(dataset().month_p), '/day=', string(dataset().day_p))",
+							"type": "Expression"
+						},
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/categoriesTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sqlLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "inputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "CategoryID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CategoryName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Description",
+						"type": "ntext"
+					},
+					{
+						"name": "Picture",
+						"type": "image"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Categories"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sqlLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/categorySynapse')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "synapseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "toSynapseNorthwindDS"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "category_id",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "category_name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "created_ts",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "northwind",
+					"table": "DimCategory"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/synapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/customersParquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "datalakeLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"year_p": {
+						"type": "int",
+						"defaultValue": 1996
+					},
+					"month_p": {
+						"type": "int",
+						"defaultValue": 7
+					},
+					"day_p": {
+						"type": "int",
+						"defaultValue": 16
+					}
+				},
+				"folder": {
+					"name": "preparedNorthwindDS"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('prepared/customers/year=', string(dataset().year_p), '/month=', string(dataset().month_p), '/day=', string(dataset().day_p))",
+							"type": "Expression"
+						},
+						"fileSystem": "northwind"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/datalakeLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/customersTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sqlLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "inputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Customers"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sqlLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/employeeFactSynapse')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "synapseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "toSynapseNorthwindDS"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "employee_key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "employee_id",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "total_distinct_territories",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_distinct_regions",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "num_orders_affiliated",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "num_products_affiliated",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "created_ts",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "northwind",
+					"table": "FactEmployee"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/synapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/employeeMonthlyFactSynapse')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "synapseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "toSynapseNorthwindDS"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "employee_key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "employee_id",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "year",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "month",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_products",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_distinct_products",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_orders",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "created_ts",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "northwind",
+					"table": "FactEmployeeMonthly"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/synapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/employeeSynapse')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "synapseLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "toSynapseNorthwindDS"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "employee_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "last_name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "first_name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "birth_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "hire_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "address",
+						"type": "nvarchar"
+					},
+					{
+						"name": "city",
+						"type": "nvarchar"
+					},
+					{
+						"name": "region",
+						"type": "nvarchar"
+					},
+					{
+						"name": "postal_code",
+						"type": "nvarchar"
+					},
+					{
+						"name": "country",
+						"type": "nvarchar"
+					},
+					{
+						"name": "supervisor_key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "created_ts",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "northwind",
+					"table": "DimEmployee"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/synapseLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/employeeTerretoriesTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sqlLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "inputNorthwindDS"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "EmployeeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TerritoryID",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "EmployeeTerritories"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sqlLS')]"
+			]
+		}
+	]
+}
