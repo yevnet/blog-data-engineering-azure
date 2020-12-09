@@ -17,12 +17,16 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
 						"storeSettings": {
 							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
 						}
 					},
 					"enableStaging": false,
@@ -84,12 +88,16 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
 						"storeSettings": {
 							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
 						}
 					},
 					"enableStaging": false,
@@ -151,7 +159,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -218,7 +227,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -285,7 +295,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -352,7 +363,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -419,7 +431,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -486,7 +499,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -553,7 +567,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -620,7 +635,8 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"queryTimeout": "02:00:00"
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
