@@ -12,7 +12,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"secretName": "datalakekey1",
-				"secretVersion": "demo"
+				"secretVersion": ""
 			}
 		}
 	},
